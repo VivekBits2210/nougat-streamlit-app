@@ -17,7 +17,7 @@ from nougat.postprocessing import markdown_compatible
 from nougat.utils.dataset import LazyDataset
 from nougat.utils.device import move_to_device, default_batch_size
 
-BASE_URL = "https://github.com/facebookresearch/nougat/releases/download"  # TODO: hide this before deploying
+BASE_URL = "https://github.com/facebookresearch/nougat/releases/download"
 MODEL_TAG = "0.1.0-base"
 CHECKPOINT_PATH = "checkpoints"
 
