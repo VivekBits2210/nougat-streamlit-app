@@ -130,7 +130,7 @@ def main():
 
         st.success('Processing Complete!')
         st.balloons()
-        st.download_button(label="Download Result", file_name="results.zip", file_or_url="./outputs/results.zip")
+        st.download_button(label="Download Result", file_name="results.zip", file="./outputs/results.zip")
 
 
 if __name__ == "__main__":
