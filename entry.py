@@ -1,6 +1,7 @@
 import logging
 import os.path
 import re
+import tempfile
 from functools import partial
 from pathlib import Path
 
@@ -111,6 +112,26 @@ def convert(pdf_files, model, batch_size):
                     file_index += 1
 
 
-model, batch_size = load_resource()
-st.write(model)
-convert([], model, batch_size)
+def main():
+    model, batch_size = load_resource()
+    st.title("OCR for scientific papers")
+    uploaded_files = st.file_uploader("Upload PDF Files", type=['pdf'], accept_multiple_files=True)
+
+    if uploaded_files:
+        # Convert UploadedFile objects to Path objects by saving them to temporary files
+        pdf_paths = []
+        for uploaded_file in uploaded_files:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp:
+                temp.write(uploaded_file.getvalue())
+                pdf_paths.append(Path(temp.name))
+
+        with st.spinner('Processing...'):
+            convert(pdf_paths, model, batch_size)
+
+        st.success('Processing Complete!')
+        st.balloons()
+        st.download_button(label="Download Result", file_name="results.zip", file_or_url="./outputs/results.zip")
+
+
+if __name__ == "__main__":
+    main()
