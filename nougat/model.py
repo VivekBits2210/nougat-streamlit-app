@@ -1,9 +1,3 @@
-"""
-Donut
-Copyright (c) 2022-present NAVER Corp.
-MIT License
-Copyright (c) Meta Platforms, Inc. and affiliates.
-"""
 import logging
 import math
 import os
