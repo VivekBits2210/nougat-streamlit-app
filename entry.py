@@ -19,11 +19,11 @@ from nougat.utils.device import move_to_device, default_batch_size
 
 BASE_URL = "https://github.com/facebookresearch/nougat/releases/download"
 MODEL_TAG = "0.1.0-base"
-CHECKPOINT_PATH = "checkpoints"
+CHECKPOINT_PATH = Path.cwd() / "checkpoints"
 
 
 @st.cache_resource
-def load_resource():
+def load_model():
     # This will only run once and then be cached.
     files = [
         "config.json",
@@ -34,20 +34,26 @@ def load_resource():
     ]
     if not os.path.exists(CHECKPOINT_PATH):
         os.makedirs(CHECKPOINT_PATH)
+        logging.info(f"Checkpoints folder created! Path - {CHECKPOINT_PATH}")
     for file in files:
         if not os.path.exists(os.path.join(CHECKPOINT_PATH, file)):
-            binary_file = requests.get(f"{BASE_URL}/{MODEL_TAG}/{file}").content
-            (Path(CHECKPOINT_PATH) / file).write_bytes(binary_file)
+            remote_path = f"{BASE_URL}/{MODEL_TAG}/{file}"
+            binary_file = requests.get(f"{remote_path}").content
+            logging.info(f"File fetched - {remote_path}")
+            local_path = Path(CHECKPOINT_PATH) / file
+            local_path.write_bytes(binary_file)
+            logging.info(f"File stored - {local_path}")
 
     size = default_batch_size()
     m = NougatModel.from_pretrained(CHECKPOINT_PATH)
     m = move_to_device(m, cuda=default_batch_size())
     m.eval()
-
+    logging.info(f"Model Info - {m}")
+    logging.info(f"Batch size set to {size}")
     return m, size
 
 
-model, batch_size = load_resource()
+model, batch_size = load_model()
 
 
 def convert(pdf_files):
@@ -55,7 +61,7 @@ def convert(pdf_files):
     for pdf in pdf_files:
         if not pdf.exists():
             continue
-        st.write(f"{pdf} exists!")
+        logging.info(f"{pdf} exists!")
         try:
             dataset = LazyDataset(
                 pdf,
