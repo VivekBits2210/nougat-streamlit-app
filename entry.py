@@ -39,19 +39,23 @@ def load_resource():
             binary_file = requests.get(f"{BASE_URL}/{MODEL_TAG}/{file}").content
             (Path(CHECKPOINT_PATH) / file).write_bytes(binary_file)
 
-    batch_size = default_batch_size()
-    model = NougatModel.from_pretrained(CHECKPOINT_PATH)
-    model = move_to_device(model, cuda=default_batch_size())
-    model.eval()
+    size = default_batch_size()
+    m = NougatModel.from_pretrained(CHECKPOINT_PATH)
+    m = move_to_device(m, cuda=default_batch_size())
+    m.eval()
 
-    return model, batch_size
+    return m, size
 
 
-def convert(pdf_files, model, batch_size):
+model, batch_size = load_resource()
+
+
+def convert(pdf_files):
     datasets = []
     for pdf in pdf_files:
         if not pdf.exists():
             continue
+        st.write(f"{pdf} exists!")
         try:
             dataset = LazyDataset(
                 pdf,
@@ -113,24 +117,35 @@ def convert(pdf_files, model, batch_size):
 
 
 def main():
-    model, batch_size = load_resource()
-    st.title("OCR for scientific papers")
-    uploaded_files = st.file_uploader("Upload PDF Files", type=['pdf'], accept_multiple_files=True)
+    st.title("OCR App using Streamlit for PDF files")
+
+    st.write("Upload one or more PDF files for OCR")
+
+    uploaded_files = st.file_uploader("Choose PDF files...", type=["pdf"], accept_multiple_files=True)
 
     if uploaded_files:
+        st.sidebar.title("About")
+        st.sidebar.info(
+            "This is an OCR application using Streamlit and pytesseract for PDF files. Upload one or more PDFs, "
+            "and we'll extract the text for you!")
+
         # Convert UploadedFile objects to Path objects by saving them to temporary files
-        pdf_paths = []
-        for uploaded_file in uploaded_files:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp:
-                temp.write(uploaded_file.getvalue())
-                pdf_paths.append(Path(temp.name))
+        pdf_names = set(file.name for file in uploaded_files)
+        selected_files = st.multiselect("Select PDFs to process", pdf_names, default=pdf_names)
 
-        with st.spinner('Processing...'):
-            convert(pdf_paths, model, batch_size)
+        if st.button("Process"):
+            pdf_paths = []
+            for uploaded_file in uploaded_files:
+                if uploaded_file.name in selected_files:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp:
+                        temp.write(uploaded_file.getvalue())
+                        pdf_paths.append(Path(temp.name))
 
-        st.success('Processing Complete!')
-        st.balloons()
-        # st.download_button(label="Download Result")
+            with st.spinner('Processing...'):
+                convert(pdf_paths)
+
+            st.success('Processing Complete!')
+            st.balloons()
 
 
 if __name__ == "__main__":
