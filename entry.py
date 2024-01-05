@@ -99,6 +99,13 @@ def convert(pdf_files):
     Args:
         pdf_files (List[Path]): The list of PDF files to be converted.
     """
+    """Convert a list of PDF files to text using the OCR model.
+
+    This function is responsible for converting a list of PDF files to text using the OCR model.
+
+    Args:
+        pdf_files (List[Path]): The list of PDF files to be converted.
+    """
     # This function is responsible for converting a list of PDF files to text using the OCR model.
     datasets = []
     for pdf in pdf_files:
@@ -171,6 +178,10 @@ def convert(pdf_files):
 
 
 def main():
+    """Handle the Streamlit interface, file uploads, and the 'Process' button functionality.
+
+    This function handles the Streamlit interface and allows users to upload PDF files for OCR processing. It also triggers the conversion of selected PDF files using the OCR model.
+    """
     """Handle the Streamlit interface, file uploads, and the 'Process' button functionality.
 
     This function handles the Streamlit interface and allows users to upload PDF files for OCR processing. It also triggers the conversion of selected PDF files using the OCR model.
