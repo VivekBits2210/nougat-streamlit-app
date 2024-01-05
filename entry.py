@@ -1,8 +1,19 @@
+"""
+Nougat Streamlit App
+
+This file contains the entry point for the Streamlit app used to convert scientific papers to markdown text.
+"""
+
 import logging
 import os.path
 import re
 import tempfile
 from functools import partial
+from typing import List
+from pathlib import Path
+from nougat.postprocessing import markdown_compatible
+from nougat import NougatModel, LazyDataset
+from nougat.utils.device import move_to_device, default_batch_size
 from pathlib import Path
 
 import pypdf
@@ -24,6 +35,14 @@ CHECKPOINT_PATH = Path.cwd() / "checkpoints"
 
 @st.cache_resource
 def load_model():
+    """Load the OCR model and set batch size.
+
+    This function loads the OCR model from a remote location if not present locally, sets the batch size, and moves the model to the appropriate device (CPU/GPU). The function caches the model after the initial load.
+
+    Returns:
+        NougatModel: The loaded OCR model.
+        int: The batch size for processing.
+    """
     # Load model from a remote location if not present locally, set batch size and move to GPU
     # This will only run once and then be cached.
     # List of model files to be checked for existence or fetched
@@ -62,6 +81,13 @@ model, batch_size = load_model()
 
 
 def convert(pdf_files):
+    """Convert a list of PDF files to text using the OCR model.
+
+    This function is responsible for converting a list of PDF files to text using the OCR model.
+
+    Args:
+        pdf_files (List[Path]): The list of PDF files to be converted.
+    """
     # This function is responsible for converting a list of PDF files to text using the OCR model.
     datasets = []
     for pdf in pdf_files:
@@ -134,6 +160,10 @@ def convert(pdf_files):
 
 
 def main():
+    """Handle the Streamlit interface, file uploads, and the 'Process' button functionality.
+
+    This function handles the Streamlit interface and allows users to upload PDF files for OCR processing. It also triggers the conversion of selected PDF files using the OCR model.
+    """
     # Main function to handle the Streamlit interface, file uploads, and the 'Process' button functionality.
     st.title("OCR App using Streamlit for PDF files")
 
