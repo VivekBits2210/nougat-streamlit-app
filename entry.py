@@ -134,6 +134,7 @@ def convert(pdf_files):
 
 
 def main():
+    # Main function to handle the Streamlit interface, file uploads, and the 'Process' button functionality.
     st.title("OCR App using Streamlit for PDF files")
 
     st.write("Upload one or more PDF files for OCR")
@@ -141,15 +142,18 @@ def main():
     uploaded_files = st.file_uploader("Choose PDF files...", type=["pdf"], accept_multiple_files=True)
 
     if uploaded_files:
+        # Sidebar to provide information about the application and its usage.
         st.sidebar.title("About")
         st.sidebar.info(
             "This is an OCR application using Streamlit and pytesseract for PDF files. Upload one or more PDFs, "
             "and we'll extract the text for you!")
 
         # Convert UploadedFile objects to Path objects by saving them to temporary files
+        # File uploader to allow users to select PDF files for OCR processing.
         pdf_names = set(file.name for file in uploaded_files)
         selected_files = st.multiselect("Select PDFs to process", pdf_names, default=pdf_names)
 
+        # The 'Process' button triggers the conversion of selected PDF files using the OCR model.
         if st.button("Process"):
             pdf_paths = []
             for uploaded_file in uploaded_files:
