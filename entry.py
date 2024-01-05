@@ -62,22 +62,26 @@ model, batch_size = load_model()
 
 
 def convert(pdf_files):
+    # This function is responsible for converting a list of PDF files to text using the OCR model.
     datasets = []
     for pdf in pdf_files:
         if not pdf.exists():
             continue
         logging.info(f"{pdf} exists!")
         try:
+            # LazyDataset is used to load pdf files incrementally to save memory usage.
             dataset = LazyDataset(
                 pdf,
                 partial(model.encoder.prepare_input, random_padding=False),
             )
         except pypdf.errors.PdfStreamError:
+            # Catch PdfStreamError if pdf file cannot be loaded due to corruption or incompatibility.
             logging.info(f"Could not load file {str(pdf)}.")
             continue
         datasets.append(dataset)
 
     if len(datasets) != 0:
+        # Create a DataLoader to batch and efficiently load the dataset.
         dataloader = torch.utils.data.DataLoader(
             ConcatDataset(datasets),
             batch_size=batch_size,
@@ -88,6 +92,7 @@ def convert(pdf_files):
         predictions = []
         file_index = 0
         page_num = 0
+        # Process each batch of data from the DataLoader.
         for i, (sample, is_last_page) in enumerate(tqdm(dataloader)):
             model_output = model.inference(
                 image_tensors=sample, early_stopping=True
@@ -110,12 +115,13 @@ def convert(pdf_files):
                         logging.warning(f"Skipping page {page_num} due to repetitions.")
                         predictions.append(f"\n\n[MISSING_PAGE_FAIL:{page_num}]\n\n")
                     else:
-                        # If we end up here, it means the document page is too different from the training domain.
+                        # Handle markdown format when the model's output is not ideal due to training domain differences.
                         # This can happen e.g. for cover pages.
                         predictions.append(
                             f"\n\n[MISSING_PAGE_EMPTY:{i * batch_size + j + 1}]\n\n"
                         )
                 else:
+                    # Convert model output to a format compatible with markdown.
                     output = markdown_compatible(output)
                     predictions.append(output)
                 if is_last_page[j]:
