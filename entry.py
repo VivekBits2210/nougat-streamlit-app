@@ -14,18 +14,29 @@ from pathlib import Path
 from nougat.postprocessing import markdown_compatible
 from nougat import NougatModel, LazyDataset
 from nougat.utils.device import move_to_device, default_batch_size
+import logging
 from pathlib import Path
+import logging
 
 import pypdf
+import logging
 import requests
+import logging
 import streamlit as st
+import logging
 import torch
+import logging
 from torch.utils.data import ConcatDataset
+import logging
 from tqdm import tqdm
+import logging
 
 from nougat import NougatModel
+import logging
 from nougat.postprocessing import markdown_compatible
+import logging
 from nougat.utils.dataset import LazyDataset
+import logging
 from nougat.utils.device import move_to_device, default_batch_size
 
 BASE_URL = "https://github.com/facebookresearch/nougat/releases/download"
