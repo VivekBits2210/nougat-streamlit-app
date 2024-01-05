@@ -24,7 +24,9 @@ CHECKPOINT_PATH = Path.cwd() / "checkpoints"
 
 @st.cache_resource
 def load_model():
+    # Load model from a remote location if not present locally, set batch size and move to GPU
     # This will only run once and then be cached.
+    # List of model files to be checked for existence or fetched
     files = [
         "config.json",
         "pytorch_model.bin",
@@ -35,6 +37,7 @@ def load_model():
     if not os.path.exists(CHECKPOINT_PATH):
         os.makedirs(CHECKPOINT_PATH)
         logging.info(f"Checkpoints folder created! Path - {CHECKPOINT_PATH}")
+        # Check each file and fetch from remote if not present locally
     for file in files:
         if not os.path.exists(os.path.join(CHECKPOINT_PATH, file)):
             remote_path = f"{BASE_URL}/{MODEL_TAG}/{file}"
@@ -45,7 +48,9 @@ def load_model():
             logging.info(f"File stored - {local_path}")
 
     size = default_batch_size()
+        # Initialize NougatModel with pre-trained weights
     m = NougatModel.from_pretrained(CHECKPOINT_PATH)
+    # Move the model to the appropriate device (CPU/GPU)
     m = move_to_device(m, cuda=default_batch_size())
     m.eval()
     logging.info(f"Model Info - {m}")
